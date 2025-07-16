@@ -1,4 +1,5 @@
 Project Title: Credit Risk Analysis & Default Prediction
+
 📌 Description
 This project focuses on analyzing credit risk and predicting loan default using supervised machine learning techniques. The objective is to assist financial institutions in identifying high-risk applicants and improving credit approval decisions.
 
