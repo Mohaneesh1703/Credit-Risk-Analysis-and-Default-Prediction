@@ -1,13 +1,12 @@
 # plumber.R
 
-# Load required packages
 library(plumber)
 library(randomForest)
 library(dplyr)
-list.files()
+
 # Load trained models
-model_rf <- readRDS("model_rf.rds")   # Random Forest model
-model_log <- readRDS("model_log.rds") # Logistic Regression model
+model_rf <- readRDS("model_rf.rds")
+model_log <- readRDS("model_log.rds")
 
 #* @apiTitle Credit Risk & Default Prediction API
 
@@ -25,8 +24,8 @@ model_log <- readRDS("model_log.rds") # Logistic Regression model
 #* @get /predict
 function(Age, Income, Loan_Amount, Loan_Term, Employment_Status, Credit_History, Marital_Status, Dependents, Bank_Statement_Score, CIBIL_Score) {
   
-  # Create a new input data frame
   new_data <- data.frame(
+    Customer_ID = 1,
     Age = as.integer(Age),
     Income = as.numeric(Income),
     Loan_Amount = as.numeric(Loan_Amount),
@@ -39,15 +38,12 @@ function(Age, Income, Loan_Amount, Loan_Term, Employment_Status, Credit_History,
     CIBIL_Score = as.integer(CIBIL_Score)
   )
   
-  # Match factor levels with training data (only needed if models were trained on factors)
   new_data$Employment_Status <- factor(new_data$Employment_Status, levels = levels(model_rf$forest$xlevels$Employment_Status))
   new_data$Marital_Status <- factor(new_data$Marital_Status, levels = levels(model_rf$forest$xlevels$Marital_Status))
   
-  # Predictions from both models
   rf_prob <- predict(model_rf, new_data, type = "prob")[,2]
   log_prob <- predict(model_log, new_data, type = "response")
   
-  # Recommendation logic
   recommendation <- ifelse(rf_prob > 0.5 | log_prob > 0.5, "High Risk", "Low Risk")
   
   return(list(
@@ -56,6 +52,3 @@ function(Age, Income, Loan_Amount, Loan_Term, Employment_Status, Credit_History,
     "Final_Recommendation" = recommendation
   ))
 }
-library(plumber)
-pr <- plumb("plumber.R")
-pr$run(port = 8000)
